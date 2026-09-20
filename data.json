@@ -1,0 +1,309 @@
+{
+  "meta": {
+    "title": "Labor market impacts of AI: A new measure and early evidence",
+    "sourceUrl": "https://www.anthropic.com/research/labor-market-impacts",
+    "publishedAt": "2026-03-05",
+    "figureUrl": "https://cdn.sanity.io/images/4zrzovbb/website/c1952c81bca02a7c8cc05ef7801e67ca60831c55-4096x4096.png",
+    "dataNote": {
+      "zh": "研究快照，非实时预测。除正文明确报告的计算机与数学 94% / 33%、办公室与行政理论值 90% 外，其余数值均为 Figure 2 读图近似值（≈），四舍五入为整数，不是官方精确数据集。计算机与数学的图示与正文略有差异，本页以正文为准。分类基于美国职业，不代表中国或全球行业就业数据。",
+      "en": "Research snapshot, not a live forecast. Except for the explicitly reported Computer & math 94% / 33% and Office & admin theoretical 90%, values are approximate Figure 2 readings (≈), rounded to whole percentages—not an official exact dataset. Computer & math differs slightly between the plot and text; this page prioritizes the text. Categories are US occupations, not Chinese or global industry employment data."
+    },
+    "method": {
+      "zh": "理论覆盖基于 Eloundou 等人的任务级 LLM 提效评分；观察覆盖结合 Claude 工作场景使用数据，对自动化用途赋予高于人机协作用途的权重。任务按时间占比汇总为职业，再按就业人数汇总为职业类别。观察覆盖仅反映研究样本，既不是全部 AI 使用率，也不是岗位消失概率。行业解释是本应用的编辑性说明，不是原报告逐字结论。",
+      "en": "Theoretical coverage uses Eloundou et al.’s task-level LLM productivity ratings. Observed coverage combines work-related Claude usage, weighting automation more than augmentation. Tasks are time-weighted into occupations and employment-weighted into categories. Observed coverage reflects the study sample, not all AI use or a probability of job loss. Category explanations are editorial context, not verbatim research findings."
+    }
+  },
+  "categories": [
+    {
+      "id": "management",
+      "zh": "管理",
+      "en": "Management",
+      "theoretical": 91,
+      "observed": 13,
+      "precision": "approximate",
+      "description": {
+        "zh": "组织协调、人员管理与决策仍需人类负责；文档和分析任务更易被辅助。",
+        "en": "Coordination, people management and accountability remain human responsibilities; documents and analysis are easier to assist."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "business-finance",
+      "zh": "商业与金融",
+      "en": "Business & finance",
+      "theoretical": 94,
+      "observed": 28,
+      "precision": "approximate",
+      "description": {
+        "zh": "信息处理、财务分析和报告撰写具有较高理论覆盖；合规与判断影响落地。",
+        "en": "Information processing, financial analysis and reporting have high theoretical exposure; compliance and judgment shape adoption."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "computer-math",
+      "zh": "计算机与数学",
+      "en": "Computer & math",
+      "theoretical": 94,
+      "observed": 33,
+      "precision": "reported",
+      "description": {
+        "zh": "编程与分析是 Claude 的常见用途。此处采用研究正文明确给出的 94% 和 33%，而非图像近似读数。",
+        "en": "Coding and analysis are common Claude uses. This category uses the 94% and 33% explicitly reported in the article rather than the approximate plotted values."
+      },
+      "reportedMetrics": [
+        "theoretical",
+        "observed"
+      ]
+    },
+    {
+      "id": "architecture-engineering",
+      "zh": "建筑设计与工程",
+      "en": "Architecture & engineering",
+      "theoretical": 85,
+      "observed": 5,
+      "precision": "approximate",
+      "description": {
+        "zh": "设计、计算和技术文档可获得辅助；现场验证、安全责任及专用软件限制全面应用。",
+        "en": "Design, calculation and documentation can be assisted; site validation, safety responsibility and specialist software constrain adoption."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "life-social-sciences",
+      "zh": "生命与社会科学",
+      "en": "Life & social sciences",
+      "theoretical": 77,
+      "observed": 11,
+      "precision": "approximate",
+      "description": {
+        "zh": "文献与数据分析具有潜力，但实验、实地调查和研究验证仍不可省略。",
+        "en": "Literature and data analysis offer potential, while experiments, fieldwork and research validation remain essential."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "social-services",
+      "zh": "社区与社会服务",
+      "en": "Social services",
+      "theoretical": 51,
+      "observed": 4,
+      "precision": "approximate",
+      "description": {
+        "zh": "记录和信息整理可以被辅助，面对面支持、信任关系与个案判断依赖人。",
+        "en": "Record keeping and information organization can be assisted; in-person support, trust and case judgment depend on people."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "legal",
+      "zh": "法律",
+      "en": "Legal",
+      "theoretical": 89,
+      "observed": 20,
+      "precision": "approximate",
+      "description": {
+        "zh": "研究与文书工作具有较高覆盖潜力，但不等于可以替代出庭、专业责任与法律判断。",
+        "en": "Research and document work have high potential coverage; this does not replace courtroom representation, professional responsibility or legal judgment."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "education-library",
+      "zh": "教育与图书馆",
+      "en": "Education & library",
+      "theoretical": 62,
+      "observed": 18,
+      "precision": "approximate",
+      "description": {
+        "zh": "备课和信息检索可以提效，但课堂管理、照护和教学关系不等同于文本任务。",
+        "en": "Lesson preparation and information retrieval can be accelerated; classroom management, care and teaching relationships are not just text tasks."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "arts-media",
+      "zh": "艺术与媒体",
+      "en": "Arts & media",
+      "theoretical": 84,
+      "observed": 19,
+      "precision": "approximate",
+      "description": {
+        "zh": "内容草拟、编辑和创意探索容易获得辅助；审美、原创方向与版权约束影响使用。",
+        "en": "Drafting, editing and creative exploration can be assisted; taste, original direction and rights affect use."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "healthcare-practitioners",
+      "zh": "医疗专业人员",
+      "en": "Healthcare practitioners",
+      "theoretical": 60,
+      "observed": 5,
+      "precision": "approximate",
+      "description": {
+        "zh": "医疗文档与知识检索具有潜力；临床照护、执业资格和安全验证限制实际应用。",
+        "en": "Documentation and knowledge retrieval offer potential; clinical care, licensing and safety validation limit deployment."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "healthcare-support",
+      "zh": "医疗辅助",
+      "en": "Healthcare support",
+      "theoretical": 28,
+      "observed": 2,
+      "precision": "approximate",
+      "description": {
+        "zh": "大量工作需要直接照护和现场协作，文本模型目前只能覆盖其中少量任务。",
+        "en": "Much of the work involves direct care and on-site coordination; text models currently cover relatively few tasks."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "protective-service",
+      "zh": "公共安全与防护",
+      "en": "Protective service",
+      "theoretical": 31,
+      "observed": 3,
+      "precision": "approximate",
+      "description": {
+        "zh": "报告和信息处理可被辅助，现场响应、执法责任和物理行动仍是核心。",
+        "en": "Reporting and information processing can be assisted; physical response and public-safety accountability remain central."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "food-serving",
+      "zh": "餐饮服务",
+      "en": "Food & serving",
+      "theoretical": 17,
+      "observed": 3,
+      "precision": "approximate",
+      "description": {
+        "zh": "备餐和服务以实体操作为主；本研究的低覆盖并不衡量机器人自动化。",
+        "en": "Preparation and service center on physical work; low coverage here does not measure robotics automation."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "grounds-maintenance",
+      "zh": "清洁与场地维护",
+      "en": "Grounds maintenance",
+      "theoretical": 4,
+      "observed": 2,
+      "precision": "approximate",
+      "description": {
+        "zh": "清洁、园艺与场地维护高度依赖物理操作，超出本研究文本模型的主要能力范围。",
+        "en": "Cleaning, landscaping and maintenance depend on physical tasks outside the main scope of text models in this study."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "personal-care",
+      "zh": "个人照护与服务",
+      "en": "Personal care",
+      "theoretical": 18,
+      "observed": 2,
+      "precision": "approximate",
+      "description": {
+        "zh": "面对面服务与实际照护占较大比重，排班或文书只是工作的一部分。",
+        "en": "In-person service and hands-on care dominate; scheduling and paperwork are only part of the job."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "sales",
+      "zh": "销售",
+      "en": "Sales",
+      "theoretical": 62,
+      "observed": 27,
+      "precision": "approximate",
+      "description": {
+        "zh": "沟通文案、产品信息和客户跟进可获辅助；谈判、信任与现场销售仍依赖具体情境。",
+        "en": "Sales copy, product information and follow-ups can be assisted; negotiation, trust and in-person sales remain contextual."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "office-admin",
+      "zh": "办公室与行政",
+      "en": "Office & admin",
+      "theoretical": 90,
+      "observed": 34,
+      "precision": "approximate",
+      "description": {
+        "zh": "文书、数据录入与信息流转具有较高覆盖。90% 理论值来自正文，观察值为读图近似值。",
+        "en": "Documents, data entry and information routing have high coverage. The 90% theoretical value is reported in the text; observed coverage is digitized from the figure."
+      },
+      "reportedMetrics": [
+        "theoretical"
+      ]
+    },
+    {
+      "id": "agriculture",
+      "zh": "农林渔业",
+      "en": "Agriculture",
+      "theoretical": 16,
+      "observed": 1,
+      "precision": "approximate",
+      "description": {
+        "zh": "种植、采收与设备操作以实体劳动为主；低覆盖不代表未来不受其他自动化影响。",
+        "en": "Growing, harvesting and equipment operation are physical; low exposure does not rule out other forms of future automation."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "construction",
+      "zh": "建筑施工",
+      "en": "Construction",
+      "theoretical": 17,
+      "observed": 1,
+      "precision": "approximate",
+      "description": {
+        "zh": "现场施工、材料处理和安全协调无法只靠文本模型完成。",
+        "en": "On-site construction, material handling and safety coordination cannot be performed by text models alone."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "installation-repair",
+      "zh": "安装与维修",
+      "en": "Installation & repair",
+      "theoretical": 18,
+      "observed": 2,
+      "precision": "approximate",
+      "description": {
+        "zh": "诊断资料可辅助判断，但安装和维修仍需要实体操作及现场经验。",
+        "en": "Diagnostic information can support judgment, but installation and repair require physical work and on-site experience."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "production",
+      "zh": "生产制造",
+      "en": "Production",
+      "theoretical": 19,
+      "observed": 1,
+      "precision": "approximate",
+      "description": {
+        "zh": "生产流程中的实体操作占比较高；本图并不是工业机器人替代率。",
+        "en": "Physical operations make up much of production work; this chart is not an industrial-robot displacement estimate."
+      },
+      "reportedMetrics": []
+    },
+    {
+      "id": "transportation",
+      "zh": "运输与物流",
+      "en": "Transportation",
+      "theoretical": 12,
+      "observed": 1,
+      "precision": "approximate",
+      "description": {
+        "zh": "驾驶、搬运与配送以物理任务为主，本研究不覆盖自动驾驶等全部技术路径。",
+        "en": "Driving, handling and delivery are physical tasks; this study does not cover all technologies such as autonomous vehicles."
+      },
+      "reportedMetrics": []
+    }
+  ]
+}

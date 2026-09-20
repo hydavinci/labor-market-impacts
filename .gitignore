@@ -1,0 +1,17 @@
+artifacts/
+deploy/*before*
+deploy/cloudflared-next.yml
+node_modules/
+
+.monitor/
+__pycache__/
+
+# Runtime output and local credentials
+update-status.json
+.env
+.env.*
+*.pem
+*.key
+
+scripts/auto_update.py
+scripts/extract_figure.py

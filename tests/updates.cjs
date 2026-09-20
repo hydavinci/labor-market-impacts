@@ -1,0 +1,22 @@
+const {chromium, launchOptions}=require('./browser.cjs');
+const assert=require('node:assert/strict');
+(async()=>{const b=await chromium.launch(launchOptions);try{
+const p=await b.newPage({viewport:{width:390,height:844}});const errors=[];p.on('pageerror',e=>errors.push(e.message));
+const base=process.env.TEST_URL||'https://market-impact.graymammoth.com/';
+await p.goto(base,{waitUntil:'networkidle'});await p.waitForFunction(()=>document.querySelector('.update-facts'));
+assert.match(await p.locator('#updateStatus').innerText(),/每周一 09:00/);
+assert.match(await p.locator('#updateStatus').innerText(),/2026-03-05/);
+await p.locator('[data-lang="en"]').click();assert.match(await p.locator('#updateStatus').innerText(),/Mondays 09:00/);
+assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+assert.match(await p.locator('#updateStatus').innerText(),/No approval or notifications/);
+assert(!(await p.locator('#updateStatus').innerText()).includes('Pending review'));
+const actual=await p.request.get(base+'update-status.json');const data=await actual.json();
+await p.route('**/update-status.json',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({...data,status:'validation_failed',pendingCount:0,history:[{at:data.lastCheckedAt,type:'source_change',count:2}]})}));
+await p.reload({waitUntil:'networkidle'});assert.match(await p.locator('.update-result').innerText(),/could not be validated/);assert.equal(await p.locator('#detailTheoryValue').innerText(),'94%');
+await p.unroute('**/update-status.json');
+await p.route('**/update-status.json',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({...data,status:'updated',mode:'automatic',pendingCount:0,lastPublishedAt:data.lastCheckedAt,history:[{at:data.lastCheckedAt,type:'published'}]})}));
+await p.reload({waitUntil:'networkidle'});assert.match(await p.locator('.update-result').innerText(),/published automatically/);assert.match(await p.locator('#updateStatus').innerText(),/Last automatic publication/);
+await p.unroute('**/update-status.json');await p.route('**/update-status.json',r=>r.fulfill({status:503,body:'Unavailable'}));
+await p.reload({waitUntil:'networkidle'});assert.match(await p.locator('#updateStatus').innerText(),/temporarily unavailable/);assert.equal(await p.locator('.ranking-item').count(),22);
+assert.deepEqual(errors,[]);console.log('PASS public status, bilingual display, mobile width, automatic validation failure fixture, status failure fallback; chart unchanged');
+}finally{await b.close()}})().catch(e=>{console.error(e);process.exit(1)});

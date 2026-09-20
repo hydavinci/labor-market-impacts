@@ -1,0 +1,7 @@
+{
+  "methodParagraphs": [
+    "we give mathematical details in the appendix . we count tasks that are theoretically capable with an llm as covered if they have seen sufficient work-related usage in claude traffic. we then adjust for how the task is being carried out: fully automated implementations receive full weight, while augmentative use receives half weight. finally, the task-level coverage measures are averaged to the occupation level weighted by the fraction of time spent on each task.",
+    "figure 2 shows observed exposure (in red) compared to β from eloundou et al. (in blue), illustrating the difference between theoretical and actual use on our platform, grouped by broad occupational categories. we calculate this by first averaging to the occupation level weighting by our time fraction measure, then averaging to the occupation category weighting by total employment. for example, the β measure shows scope for llm penetration in the majority of tasks in computer & math (<percent>) and office & admin (<percent>) occupations."
+  ],
+  "figureSha256": "551be10b7e1bb948d8ec4eb988db359a90ed66d834dba781224c4f65118269bd"
+}

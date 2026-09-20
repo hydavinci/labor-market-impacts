@@ -1,0 +1,19 @@
+[Unit]
+Description=Labor Market Impacts automatic source and data update
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=OpenClaw
+Group=OpenClaw
+WorkingDirectory=/home/Labor-Market-Impacts
+ExecStart=/usr/bin/python3 /home/Labor-Market-Impacts/scripts/project_update.py
+TimeoutStartSec=15min
+UMask=0022
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/home/Labor-Market-Impacts
+ProtectHome=read-only
+RestrictSUIDSGID=true

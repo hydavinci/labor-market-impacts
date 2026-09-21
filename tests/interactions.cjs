@@ -5,6 +5,7 @@ try{
 const p=await b.newPage({viewport:{width:1440,height:1100}});const errors=[];p.on('pageerror',e=>errors.push(e.message));
 await p.goto(process.env.TEST_URL || 'https://market-impact.graymammoth.com/',{waitUntil:'networkidle'});
 assert.equal(await p.locator('.ranking-item').count(),22);
+assert.equal(await p.locator('#categoryPicker, .category-picker').count(),0);
 assert.equal(await p.locator('#detailTitle').innerText(),'计算机与数学');
 assert.equal(await p.locator('#detailTheoryValue').innerText(),'94%');
 assert.equal(await p.locator('#detailObservedValue').innerText(),'33%');
@@ -20,15 +21,16 @@ await p.locator('#categorySearch').fill('');
 await p.locator('[data-sort="gap"]').click();assert.equal(await p.locator('.ranking-item').first().getAttribute('data-id'),'architecture-engineering');
 await p.locator('[data-sort="observed"]').click();assert.equal(await p.locator('.ranking-item').first().getAttribute('data-id'),'office-admin');
 await p.locator('[data-series="theoretical"]').click();assert(await p.locator('.radar-polygon-theoretical').evaluate(e=>e.classList.contains('radar-series-hidden')));
-await p.locator('[data-series="observed"]').click();assert.equal(await p.locator('.legend-toggle[aria-pressed="true"]').count(),2);
-await p.locator('#categoryPicker').selectOption('office-admin');assert.equal(await p.locator('#detailTheoryValue').innerText(),'90%');assert.equal(await p.locator('#detailObservedValue').innerText(),'≈34%');
+await p.locator('[data-series="observed"]').click();assert.equal(await p.locator('.legend-toggle[aria-pressed="true"]').count(),0);
+await p.locator('[data-series="theoretical"]').click();await p.locator('[data-series="observed"]').click();assert.equal(await p.locator('.legend-toggle[aria-pressed="true"]').count(),2);
+await p.locator('.radar-label-button[data-id="office-admin"]').click();assert.equal(await p.locator('#detailTheoryValue').innerText(),'90%');assert.equal(await p.locator('#detailObservedValue').innerText(),'≈34%');
 const axis=p.locator('.radar-label-button[data-id="sales"]');await axis.focus();await p.keyboard.press('Enter');assert.equal(await p.locator('#detailTitle').innerText(),'Sales');assert.equal(await p.evaluate(()=>document.activeElement.dataset.id),'sales');
 const dl=p.waitForEvent('download');await p.locator('#downloadCsv').click();const download=await dl;assert.equal(download.suggestedFilename(),'ai-labor-market-impacts.csv');const csv=fs.readFileSync(await download.path(),'utf8');assert.equal(csv.trim().split('\n').length,23);assert(csv.includes('research_date'));assert(csv.includes('approximate'));assert(csv.includes('anthropic.com'));
-await p.locator('#categoryPicker').selectOption('computer-math');await p.evaluate(()=>window.scrollTo(0,0));await p.screenshot({path:path.resolve(__dirname,'../artifacts/en-desktop.png'),fullPage:true});
-for(const width of [390,320]){await p.setViewportSize({width,height:844});const sizes=await p.evaluate(()=>[document.documentElement.scrollWidth,innerWidth]);assert(sizes[0]<=sizes[1],`en overflow ${width}`);await p.screenshot({path:path.resolve(__dirname,`../artifacts/en-${width}.png`),fullPage:true});}
+await p.locator('.ranking-item[data-id="computer-math"]').click();await p.evaluate(()=>window.scrollTo(0,0));await p.screenshot({path:path.resolve(__dirname,'../artifacts/en-desktop.png'),fullPage:true});
+for(const width of [390,320]){await p.setViewportSize({width,height:844});await p.locator('.radar-label-button[data-id="office-admin"]').click();assert.equal(await p.locator('#detailTitle').innerText(),'Office & admin');const sizes=await p.evaluate(()=>[document.documentElement.scrollWidth,innerWidth]);assert(sizes[0]<=sizes[1],`en overflow ${width}`);await p.screenshot({path:path.resolve(__dirname,`../artifacts/en-${width}.png`),fullPage:true});}
 await p.locator('[data-lang="zh"]').click();await p.reload({waitUntil:'networkidle'});assert.equal(await p.locator('html').getAttribute('lang'),'zh-Hans');
 assert.deepEqual(errors,[]);
 const errorPage=await b.newPage();await errorPage.route('**/data.json',route=>route.fulfill({status:503,body:'unavailable'}));await errorPage.goto('https://market-impact.graymammoth.com/');await errorPage.waitForSelector('#loadStatus.error');assert(await errorPage.locator('#downloadCsv').isDisabled());assert(!(await errorPage.locator('body').innerText()).includes('父任务'));await errorPage.close();
 await p.goto('https://www.graymammoth.com/',{waitUntil:'networkidle'});assert.equal(await p.locator('a.card[href="https://market-impact.graymammoth.com/"]').count(),1);assert.equal(await p.locator('a.card[href="https://wineer.graymammoth.com"]').count(),1);assert.equal(await p.locator('a.card[href="https://industry.graymammoth.com"]').count(),1);
-console.log('PASS language + persistence, 22 rows, exact/approx values, pp units, bilingual search + empty state, sorting, legend, keyboard focus, picker, CSV + provenance, English mobile, fetch failure, homepage + prior cards; no JS errors');
+console.log('PASS language + persistence, 22 rows, exact/approx values, pp units, bilingual search + empty state, sorting, legend, keyboard focus, radar/list selection, CSV + provenance, English mobile, fetch failure, homepage + prior cards; no JS errors');
 }finally{await b.close()}})().catch(e=>{console.error(e);process.exit(1)});

@@ -969,8 +969,6 @@ html[lang="zh-Hans"] .hero h1 { font-size:clamp(1.75rem,3.4vw,2.75rem); line-hei
 .hero-lede {font-size:clamp(1rem,1.45vw,1.2rem);}
 .stat-value {font-size:clamp(1.7rem,3.5vw,2.8rem);}
 #statGap { font-size:clamp(1.5rem,2.4vw,2rem); }
-.category-picker {display:flex;align-items:center;gap:.75rem;margin:1.2rem 0 .3rem;color:var(--muted);font-size:.84rem;}
-.category-picker select {font:inherit;min-width:0;flex:1;border:1px solid var(--faint);background:var(--panel-solid);color:var(--ink);border-radius:10px;padding:.6rem;max-width:100%;}
 .radar-scale {font-size:12px;fill:#566072;paint-order:stroke;stroke:#fffaf2;stroke-width:5px;stroke-linejoin:round;}
 .stat-helper {line-height:1.6;}
 .controls-panel h2,.panel-heading h2,.detail-card h2,.ranking-header h2 {line-height:1.3;}
@@ -992,7 +990,6 @@ html[lang="zh-Hans"] .hero h1 { font-size:clamp(1.75rem,3.4vw,2.75rem); line-hei
  .radar-label-text {font-size:23px;}
  .radar-label-bg {stroke-width:1.5px;}
  .radar-scale {font-size:20px;}
- .category-picker {display:grid;gap:.4rem;}
  .detail-card {scroll-margin-top:90px;}
  .metric-list div {grid-template-columns:1fr auto;}
  .metric-list dd {text-align:right;}
@@ -1036,7 +1033,7 @@ html[lang="zh-Hans"] .hero h1 {font-size:clamp(1.65rem,2.4vw,2rem);line-height:1
   .stat-value {font-size:1.65rem;}
   #statGap {font-size:1.2rem;}
   .stat-label,.stat-helper,.hero-notes span {font-size:.8rem;}
-  .radar-label-text {font-size:19px;font-weight:500;}
+  .radar-label-text {font-size:19px;font-weight:500;transform:translateY(15px);}
   .radar-short-label {font-size:0;}
   .radar-scale {font-size:18px;}
 }

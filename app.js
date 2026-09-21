@@ -200,7 +200,6 @@
   }
 
   function bindControls() {
-    document.getElementById('categoryPicker').addEventListener('change', e => selectCategory(e.target.value, false));
     document.querySelectorAll('.lang-button').forEach((button) => {
       button.addEventListener('click', () => setLanguage(button.dataset.lang));
     });
@@ -208,18 +207,8 @@
     document.querySelectorAll('.legend-toggle').forEach((button) => {
       button.addEventListener('click', () => {
         const series = button.dataset.series;
-        const bothVisible = state.visibleSeries.theoretical && state.visibleSeries.observed;
-        const oneVisible = Object.values(state.visibleSeries).filter(Boolean).length === 1;
-        if (oneVisible && state.visibleSeries[series]) {
-          state.visibleSeries = { theoretical: true, observed: true };
-        } else if (bothVisible) {
-          state.visibleSeries[series] = false;
-        } else {
-          state.visibleSeries[series] = !state.visibleSeries[series];
-        }
-        if (!state.visibleSeries.theoretical && !state.visibleSeries.observed) {
-          state.visibleSeries[series] = true;
-        }
+        // Independent toggles: switching one series must never change the other.
+        state.visibleSeries[series] = !state.visibleSeries[series];
         updateLegendButtons();
         renderRadar();
         renderRanking();
@@ -370,9 +359,6 @@
     el.detailGap.textContent = formatSignedPercent(gap, item.precision === 'approximate');
     el.detailPrecision.textContent = item.precision === 'reported' ? t('precisionReported') : t('precisionApproximate');
     el.detailCaveat.textContent = t('detailCaveat');
-    const picker = document.getElementById('categoryPicker');
-    picker.innerHTML = state.data.categories.map((c,i) => `<option value="${escapeHtml(c.id)}">${String(i+1).padStart(2,'0')} · ${escapeHtml(localizedName(c))}</option>`).join('');
-    picker.value = item.id;
   }
 
   function renderRadar() {
@@ -465,30 +451,37 @@
         'aria-label': `${t('axisAria')}: ${index + 1}. ${localizedName(category)}`,
         'data-id': category.id
       });
-      const short = shortLabel(category);
+      // Override the inherited chart tooltip with the full occupational name.
+      group.appendChild(svgNode('title', {}, `${index + 1}. ${localizedName(category)}`));
+      const lines = labelLines(category);
       group.appendChild(svgNode('rect', {
         class: 'radar-label-bg',
-        x: p.x - 24,
-        y: p.y - 21,
-        width: 48,
-        height: 42,
+        x: p.x - 42,
+        y: p.y - 28,
+        width: 84,
+        height: 56,
         rx: 16,
         ry: 16
       }));
       group.appendChild(svgNode('text', {
         class: 'radar-label-text',
         x: p.x,
-        y: p.y - 2,
+        y: p.y - 15,
         'text-anchor': 'middle',
         'dominant-baseline': 'middle'
       }, String(index + 1)));
-      group.appendChild(svgNode('text', {
+      const label = svgNode('text', {
         class: 'radar-short-label',
-        x: p.x,
-        y: p.y + 14,
         'text-anchor': 'middle',
         'dominant-baseline': 'middle'
-      }, short));
+      });
+      lines.forEach((line, lineIndex) => {
+        label.appendChild(svgNode('tspan', {
+          x: p.x,
+          y: p.y + 2 + lineIndex * 12
+        }, line));
+      });
+      group.appendChild(label);
       addSelectionHandlers(group, category.id);
       labelGroup.appendChild(group);
     });
@@ -497,13 +490,15 @@
 
   function pointButton(category, point, series) {
     const isSelected = category.id === state.selectedId;
+    const tooltip = `${localizedName(category)} · ${series === 'theoretical' ? t('legendTheory') : t('legendObserved')}：${formatPercent(category[series], isApprox(category, series))}`;
     const group = svgNode('g', {
       class: `radar-point-button${isSelected ? ' selected' : ''}`,
       tabindex: '0',
       role: 'button',
-      'aria-label': `${t('pointAria')}: ${localizedName(category)}, ${series === 'theoretical' ? t('legendTheory') : t('legendObserved')}`,
+      'aria-label': `${t('pointAria')}: ${tooltip}`,
       'data-id': category.id
     });
+    group.appendChild(svgNode('title', {}, tooltip));
     group.appendChild(svgNode('circle', {
       class: `radar-point-${series}`,
       cx: point.x,
@@ -633,7 +628,6 @@
     if (state.errorKey) {
       el.status.innerHTML = `<strong>${escapeHtml(t(state.errorKey))}</strong>`;
     }
-    document.getElementById('pickerLabel').textContent = state.lang === 'zh' ? '选择职业领域' : 'Explore an occupational field';
     document.querySelector('.home-link').textContent = state.lang === 'zh' ? '← Gray Mammoth 项目集' : '← Gray Mammoth projects';
     const chart = document.getElementById('radarChart');
     chart.setAttribute('role', 'group');
@@ -718,10 +712,24 @@
     return state.lang === 'zh' ? item.zh : item.en;
   }
 
-  function shortLabel(item) {
+  function labelLines(item) {
     const name = localizedName(item);
-    if (state.lang === 'zh') return name.replace(/[、，,\/].*$/, '').slice(0, 4);
-    return name.split(/[,&/]/)[0].trim().split(/\s+/).slice(0, 2).join(' ');
+    if (state.lang === 'zh') {
+      // Prefer a conjunction boundary; retain every character of the full name.
+      const split = name.indexOf('与') + 1;
+      if (name.length > 4 && split > 0 && split <= 4 && name.length - split <= 4) {
+        return [name.slice(0, split), name.slice(split)];
+      }
+      return name.match(/.{1,4}/gu) || [name];
+    }
+    // Wrap English on word boundaries, never discard the rest of the name.
+    const lines = [''];
+    for (const word of name.split(/\s+/)) {
+      const last = lines.length - 1;
+      if (lines[last] && `${lines[last]} ${word}`.length > 14) lines.push(word);
+      else lines[last] += `${lines[last] ? ' ' : ''}${word}`;
+    }
+    return lines;
   }
 
   function isApprox(item, metric) {

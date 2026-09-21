@@ -10,7 +10,7 @@
   <meta name="description" content="AI 劳动力市场影响双语观察站：基于 Anthropic AI Labor Market Impacts 数据的 22 个职业大类任务覆盖与 Claude 使用对照。">
   <title>AI 劳动力市场影响观察站</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=25">
 </head>
 <body>
   <a class="skip-link" href="#main" data-i18n="skip">跳到主要内容</a>
@@ -87,25 +87,23 @@
           <p class="section-kicker" data-i18n="exploreKicker">交互探索</p>
           <h2 id="exploreTitle" data-i18n="exploreTitle">点击雷达轴或排名条，查看职业细节</h2>
         </div>
-
-        <div class="legend" aria-label="Series visibility">
-          <button class="legend-toggle active" type="button" data-series="theoretical" aria-pressed="true">
-            <span class="swatch blue" aria-hidden="true"></span>
-            <span data-i18n="legendTheory">理论覆盖</span>
-          </button>
-          <button class="legend-toggle active" type="button" data-series="observed" aria-pressed="true">
-            <span class="swatch coral" aria-hidden="true"></span>
-            <span data-i18n="legendObserved">观察使用</span>
-          </button>
-        </div>
       </div>
 
       <div class="viz-grid">
         <section class="panel radar-panel" aria-labelledby="radarTitle">
           <div class="panel-heading">
             <div>
-              <p class="section-kicker" data-i18n="radarKicker">22 类职业雷达</p>
-              <h2 id="radarTitle" data-i18n="radarTitle">理论影响 vs. 已观察使用</h2>
+              <p id="radarTitle" class="section-kicker" data-i18n="radarKicker">22 类职业雷达</p>
+              <div class="legend" aria-label="Series visibility">
+                <button class="legend-toggle active" type="button" data-series="theoretical" aria-pressed="true">
+                  <span class="swatch blue" aria-hidden="true"></span>
+                  <span data-i18n="legendTheory">理论覆盖</span>
+                </button>
+                <button class="legend-toggle active" type="button" data-series="observed" aria-pressed="true">
+                  <span class="swatch coral" aria-hidden="true"></span>
+                  <span data-i18n="legendObserved">观察使用</span>
+                </button>
+              </div>
             </div>
             <p class="chart-hint" data-i18n="radarHint">键盘用户可 Tab 到编号标签或数据点后按 Enter。</p>
           </div>
@@ -117,6 +115,7 @@
           </div>
         </section>
 
+        <div class="radar-sidebar">
         <aside class="panel detail-card" aria-labelledby="detailTitle" aria-live="polite">
           <p class="section-kicker" data-i18n="selectedKicker">当前选择</p>
           <h2 id="detailTitle">—</h2>
@@ -141,6 +140,16 @@
           </dl>
           <p class="detail-caveat" id="detailCaveat" data-i18n="detailCaveat">若数值来自论文图形近似读取，将以“≈”标记；请结合数据说明理解。</p>
         </aside>
+        <section class="panel heat-card" aria-labelledby="heatTitle">
+          <h2 id="heatTitle" data-i18n="heatTitle">当前职业覆盖</h2>
+          <p id="heatSelected" class="heat-selected" aria-live="polite"></p>
+          <div id="heatChart" role="img" aria-describedby="heatNote"></div>
+          <div id="heatValues"></div>
+          <p id="heatUnavailable" class="heat-note" data-i18n="heatHidden" hidden>已隐藏两项指标，可通过雷达图上方图例开启。</p>
+          <p id="heatGap" class="heat-gap"></p>
+          <p id="heatNote" class="heat-note" data-i18n="heatHint">每格 1%，按行填充。蓝色表示理论覆盖，珊瑚色表示观察覆盖；叠加仅比较比例，不代表任务重合。</p>
+        </section>
+        </div>
       </div>
     </section>
 
@@ -148,7 +157,7 @@
       <div class="ranking-header">
         <div>
           <p class="section-kicker" data-i18n="rankingKicker">可搜索排名</p>
-          <h2 id="rankingTitle" data-i18n="rankingTitle">横向条形对比</h2>
+          <h2 id="rankingTitle" data-i18n="rankingTitle">职业覆盖与落差</h2>
         </div>
         <div class="ranking-tools">
           <label class="search-label" for="categorySearch" data-i18n="searchLabel">搜索职业</label>
@@ -164,28 +173,14 @@
         <span><span class="swatch blue"></span><span data-i18n="legendTheory">理论覆盖</span></span>
         <span><span class="swatch coral"></span><span data-i18n="legendObserved">观察使用</span></span>
       </div>
+      <div class="ranking-scales" aria-hidden="true">
+        <div class="dumbbell-scale"><span>0%</span><span>50%</span><span>100%</span></div>
+      </div>
       <div id="rankingList" class="ranking-list"></div>
       <p class="empty-state" id="emptyState" hidden data-i18n="emptyState">没有匹配的职业大类。</p>
     </section>
 
-    <section class="method-grid" id="methodGrid" hidden>
-      <article class="panel prose-card">
-        <p class="section-kicker" data-i18n="methodKicker">方法</p>
-        <h2 data-i18n="methodTitle">如何阅读这份图表</h2>
-        <p id="methodText">—</p>
-        <p class="source-meta" id="sourceMeta">—</p>
-      </article>
-      <article class="panel prose-card caveat-card">
-        <p class="section-kicker" data-i18n="caveatKicker">重要边界</p>
-        <h2 data-i18n="caveatTitle">这不是“失业预测”</h2>
-        <ul>
-          <li data-i18n="caveatTask">指标描述的是任务层面的可自动化/辅助潜力与实际使用信号，不等于岗位消失概率。</li>
-          <li data-i18n="caveatClaude">观察使用来自 Claude 对话分布，不代表所有 AI 工具或整个行业的采用程度。</li>
-          <li data-i18n="caveatUS">职业类别采用美国职业分类/任务口径，跨国家或行业迁移时需要谨慎。</li>
-        </ul>
-        <p class="data-note" id="dataNote">—</p>
-      </article>
-    </section>
+
     <section class="panel update-panel" id="updateStatus" aria-live="polite"></section>
   </main>
 
@@ -195,7 +190,7 @@
     <p><span data-i18n="footerSource">原始研究：</span><a id="footerSourceLink" href="https://www.anthropic.com/research/labor-market-impacts" target="_blank" rel="noopener">Anthropic: AI Labor Market Impacts</a></p>
   </footer>
 
-  <script src="app.js?v=6" defer></script>
+  <script src="app.js?v=15" defer></script>
   <script src="updates.js?v=2" defer></script>
 </body>
 </html>

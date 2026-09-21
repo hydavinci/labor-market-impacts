@@ -20,11 +20,12 @@ const series = ['theoretical', 'observed'];
           assert.equal(await button.evaluate(el => el.classList.contains('active')), visible);
           assert.equal(await page.locator(`.radar-polygon-${name}`).evaluate(el => el.classList.contains('radar-series-hidden')), !visible);
           assert.equal(await page.locator(`.radar-point-${name}`).count(), visible ? 22 : 0);
+          const dots = page.locator(`.dumbbell-dot.${name}:visible`);
+          assert.equal(await dots.count(), visible ? 22 : 0);
           const color = name === 'theoretical' ? 'blue' : 'coral';
-          const widths = await page.locator(`.bar-fill.${color}`).evaluateAll(els => els.map(el => parseFloat(el.style.width)));
-          assert.equal(widths.length, 22);
-          assert.equal(widths.some(value => value > 0), visible);
+          assert.equal(await page.locator(`.dumbbell-value.${color}:visible`).count(), visible ? 22 : 0);
         }
+        assert.equal(await page.locator('.dumbbell-link:visible').count(), expected.theoretical && expected.observed ? 22 : 0);
         assert.equal(await page.locator('.radar-label-button').count(), 22);
       }
       for (const lang of ['zh', 'en']) {
@@ -46,6 +47,6 @@ const series = ['theoretical', 'observed'];
       assert.deepEqual(errors, []);
       await page.close();
     }
-    console.log('PASS independent legend toggles: all four states/eight transitions, click/Enter/Space, Chinese/English, desktop/mobile, polygons/points/bars synchronized');
+    console.log('PASS independent legend toggles: all four states/eight transitions, click/Enter/Space, Chinese/English, desktop/mobile, polygons/points/dumbbells synchronized');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exit(1); });

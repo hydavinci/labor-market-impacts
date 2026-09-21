@@ -3,6 +3,9 @@
 
   const I18N = {
     zh: {
+      heatTitle: '当前职业覆盖',
+      heatHint: '每格 1%，按行填充。蓝色表示理论覆盖，珊瑚色表示观察覆盖；叠加仅比较比例，不代表任务重合。',
+      heatHidden: '已隐藏两项指标，可通过雷达图上方图例开启。',
       skip: '跳到主要内容',
       brandTop: '劳动力市场',
       brandBottom: '影响观察站',
@@ -42,7 +45,7 @@
       precisionApproximate: '近似读取',
       precisionReported: '报告值',
       rankingKicker: '可搜索排名',
-      rankingTitle: '横向条形对比',
+      rankingTitle: '职业覆盖与落差',
       searchLabel: '搜索职业',
       searchPlaceholder: '搜索中文或英文名称',
       sortObserved: '按观察覆盖',
@@ -71,10 +74,13 @@
       axisAria: '选择职业类别',
       pointAria: '选择数据点',
       noDescription: '暂无描述。',
-      defaultMethod: '本页读取本地 data.json，将每个职业大类的理论任务覆盖与 Claude 使用观察值标准化到 0–100，并用雷达图与排名条展示差异。',
+      defaultMethod: '本页读取本地 data.json，将每个职业大类的理论任务覆盖与 Claude 使用观察值标准化到 0–100，并用雷达图与哑铃排名图展示差异。',
       defaultDataNote: '部分数值可能来自 Anthropic 图形的近似读取，因此应用会以“≈”提示不确定性。'
     },
     en: {
+      heatTitle: 'Selected occupation coverage',
+      heatHint: 'Each cell is 1%, filled row by row. Blue shows theoretical coverage; coral shows observed coverage. Overlay compares proportions, not shared tasks.',
+      heatHidden: 'Both metrics are hidden. Enable them in the radar legend.',
       skip: 'Skip to main content',
       brandTop: 'Labor Market',
       brandBottom: 'Impact Observatory',
@@ -114,7 +120,7 @@
       precisionApproximate: 'Approximate',
       precisionReported: 'Reported',
       rankingKicker: 'Searchable ranking',
-      rankingTitle: 'Horizontal bar comparison',
+      rankingTitle: 'Coverage & gaps by occupation',
       searchLabel: 'Search occupation',
       searchPlaceholder: 'Search Chinese or English name',
       sortObserved: 'Observed coverage',
@@ -143,7 +149,7 @@
       axisAria: 'Select occupational category',
       pointAria: 'Select data point',
       noDescription: 'No description available.',
-      defaultMethod: 'This page reads local data.json, normalizes theoretical task exposure and observed Claude usage to a 0–100 scale, and presents their differences through a radar chart and ranking bars.',
+      defaultMethod: 'This page reads local data.json, normalizes theoretical task exposure and observed Claude usage to a 0–100 scale, and presents their differences through a radar chart and a paired-dot ranking.',
       defaultDataNote: 'Some values may be approximated from Anthropic figures, so the interface marks them with “≈” to signal uncertainty.'
     }
   };
@@ -164,7 +170,6 @@
     statsGrid: document.getElementById('statsGrid'),
     dashboard: document.getElementById('dashboard'),
     rankingSection: document.getElementById('rankingSection'),
-    methodGrid: document.getElementById('methodGrid'),
     statCount: document.getElementById('statCount'),
     statTheory: document.getElementById('statTheory'),
     statObserved: document.getElementById('statObserved'),
@@ -180,9 +185,6 @@
     rankingList: document.getElementById('rankingList'),
     emptyState: document.getElementById('emptyState'),
     search: document.getElementById('categorySearch'),
-    methodText: document.getElementById('methodText'),
-    dataNote: document.getElementById('dataNote'),
-    sourceMeta: document.getElementById('sourceMeta'),
     downloadCsv: document.getElementById('downloadCsv'),
     sourceLinks: [
       document.getElementById('navSourceLink'),
@@ -211,6 +213,7 @@
         state.visibleSeries[series] = !state.visibleSeries[series];
         updateLegendButtons();
         renderRadar();
+        renderHeatmap();
         renderRanking();
       });
     });
@@ -306,7 +309,6 @@
     el.statsGrid.hidden = false;
     el.dashboard.hidden = false;
     el.rankingSection.hidden = false;
-    el.methodGrid.hidden = false;
     el.downloadCsv.disabled = false;
   }
 
@@ -322,6 +324,7 @@
     renderStats();
     renderDetail();
     renderRadar();
+    renderHeatmap();
     renderRanking();
     renderMethod();
   }
@@ -340,9 +343,6 @@
 
   function renderMethod() {
     const meta = state.data.meta;
-    el.methodText.textContent = meta.method[state.lang] || t('defaultMethod');
-    el.dataNote.textContent = meta.dataNote[state.lang] || t('defaultDataNote');
-    el.sourceMeta.textContent = meta.publishedAt ? `${t('sourceUpdated')}: ${formatDate(meta.publishedAt)}` : `${t('sourceUpdated')}: —`;
     el.sourceLinks.forEach((link) => {
       if (link) link.href = meta.sourceUrl;
     });
@@ -359,6 +359,48 @@
     el.detailGap.textContent = formatSignedPercent(gap, item.precision === 'approximate');
     el.detailPrecision.textContent = item.precision === 'reported' ? t('precisionReported') : t('precisionApproximate');
     el.detailCaveat.textContent = t('detailCaveat');
+  }
+
+  function renderHeatmap() {
+    const item = getSelected();
+    const chart = document.getElementById('heatChart');
+    chart.replaceChildren();
+    chart.dataset.id = item.id;
+    document.getElementById('heatSelected').textContent = localizedName(item);
+    const values = document.getElementById('heatValues');
+    values.replaceChildren();
+    const visible = ['theoretical', 'observed'].filter(series => state.visibleSeries[series]);
+    const descriptions = visible.map(series => {
+      const label = series === 'theoretical' ? t('legendTheory') : t('legendObserved');
+      const formatted = formatPercent(item[series], isApprox(item, series));
+      const row = document.createElement('div');
+      row.className = `heat-value ${series}`;
+      row.innerHTML = `<span class="heat-value-label"><i class="heat-swatch" aria-hidden="true"></i>${escapeHtml(label)}</span><strong>${escapeHtml(formatted)}</strong>`;
+      values.appendChild(row);
+      return `${label}: ${formatted}`;
+    });
+    chart.setAttribute('aria-label', `${localizedName(item)} · ${descriptions.join(' · ') || t('heatHidden')}`);
+    // Each layer independently encodes its own percentage; never clamp observed to theory.
+    for (let i = 0; i < 100; i++) {
+      const cell = document.createElement('span');
+      cell.className = 'heat-cell';
+      cell.setAttribute('aria-hidden', 'true');
+      visible.forEach(series => {
+        const layer = document.createElement('span');
+        layer.className = `heat-layer ${series}`;
+        const fill = document.createElement('span');
+        fill.className = `heat-fill ${series}`;
+        fill.style.width = `${Math.max(0, Math.min(1, item[series] - i)) * 100}%`;
+        layer.appendChild(fill);
+        cell.appendChild(layer);
+      });
+      chart.appendChild(cell);
+    }
+    const both = state.visibleSeries.theoretical && state.visibleSeries.observed;
+    const gap = document.getElementById('heatGap');
+    gap.hidden = !both;
+    gap.textContent = `${t('gapLabel')} · ${formatSignedPercent(item.theoretical - item.observed, item.precision === 'approximate')}`;
+    document.getElementById('heatUnavailable').hidden = state.visibleSeries.theoretical || state.visibleSeries.observed;
   }
 
   function renderRadar() {
@@ -541,24 +583,27 @@
     const theory = formatPercent(category.theoretical, isApprox(category, 'theoretical'));
     const observed = formatPercent(category.observed, isApprox(category, 'observed'));
     const gap = formatSignedPercent(category.theoretical - category.observed, approx);
-    const theoryWidth = state.visibleSeries.theoretical ? category.theoretical : 0;
-    const observedWidth = state.visibleSeries.observed ? category.observed : 0;
+    const theoryVisible = state.visibleSeries.theoretical;
+    const observedVisible = state.visibleSeries.observed;
+    const low = Math.min(category.theoretical, category.observed);
+    const distance = Math.abs(category.theoretical - category.observed);
+    const theoryTitle = escapeHtml(`${t('detailTheory')}: ${theory}`);
+    const observedTitle = escapeHtml(`${t('detailObserved')}: ${observed}`);
     return `
       <div class="rank-row-top">
         <div class="rank-name"><span class="rank-id">${rank}.</span>${escapeHtml(localizedName(category))}</div>
         <div class="rank-values">${escapeHtml(t('gapLabel'))}: ${escapeHtml(gap)}</div>
       </div>
-      <div class="rank-bars">
-        <div class="rank-bar-line">
-          <span>${escapeHtml(t('theoryShort'))}</span>
-          <span class="bar-track"><span class="bar-fill blue" style="width:${theoryWidth}%"></span></span>
-          <strong>${escapeHtml(theory)}</strong>
-        </div>
-        <div class="rank-bar-line">
-          <span>${escapeHtml(t('observedShort'))}</span>
-          <span class="bar-track"><span class="bar-fill coral" style="width:${observedWidth}%"></span></span>
-          <strong>${escapeHtml(observed)}</strong>
-        </div>
+      <div class="dumbbell-values" aria-hidden="true">
+        <span class="dumbbell-value coral" title="${observedTitle}" ${observedVisible ? '' : 'hidden'}>${escapeHtml(observed)}</span>
+        <span class="dumbbell-value blue" title="${theoryTitle}" ${theoryVisible ? '' : 'hidden'}>${escapeHtml(theory)}</span>
+      </div>
+      <div class="dumbbell-plot" aria-hidden="true">
+        <span class="dumbbell-track"></span>
+        <span class="dumbbell-midpoint"></span>
+        <span class="dumbbell-link" style="left:${low}%;width:${distance}%" ${theoryVisible && observedVisible ? '' : 'hidden'}></span>
+        <span class="dumbbell-dot theoretical" style="left:${category.theoretical}%" title="${theoryTitle}" ${theoryVisible ? '' : 'hidden'}></span>
+        <span class="dumbbell-dot observed" style="left:${category.observed}%" title="${observedTitle}" ${observedVisible ? '' : 'hidden'}></span>
       </div>
     `;
   }
@@ -584,6 +629,7 @@
     state.selectedId = id;
     renderDetail();
     renderRadar();
+    renderHeatmap();
     renderRanking();
     if (restoreClass) document.querySelector(`.${restoreClass}[data-id="${CSS.escape(id)}"]`)?.focus({preventScroll:true});
     if (scrollToDetail && window.matchMedia('(max-width: 980px)').matches) {
@@ -604,6 +650,7 @@
       renderStats();
       renderDetail();
       renderRadar();
+      renderHeatmap();
       renderRanking();
       renderMethod();
     }
